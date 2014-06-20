@@ -1,0 +1,269 @@
+<link rel="import" href="google-analytics-base.html">
+
+<!--
+Element for displaying the results of a Google Analytics query in a
+Google Chart.
+
+##### Example
+
+    <google-analytics-chart
+      ids="ga:1174"
+      metrics="ga:sessions"
+      dimensions="ga:country"
+      sort="-ga:sessions"
+      maxResults="5"
+      chartType="column">
+    </google-analytics-chart>
+
+@element google-analytics-chart
+@blurb Element for displaying Google Analytics data visualizations.
+@status alpha
+@homepage http://polymerlabs.github.io/google-analytics
+-->
+
+<polymer-element
+  name="google-analytics-chart"
+  extends="google-analytics-base"
+  attributes="
+    ids
+    startDate
+    endDate
+    metrics
+    dimensions
+    sort
+    filters
+    maxResults
+    chartType
+    chartOptions">
+
+  <template>
+    <template if="{{ isTypeTable }}">
+      <style>
+        table {
+          font: 13px Arial, sans-serif;
+        }
+        .gapi-analytics-data-chart-table-styles-thr {
+          font-weight:700;
+        }
+        .gapi-analytics-data-chart-table-styles-tr {
+          background:#f8f8f8;
+        }
+        .gapi-analytics-data-chart-table-styles-tr-hover {
+          background-color:#fffce8;
+        }
+        .gapi-analytics-data-chart-table-styles-tr-selected {
+          background-color:#e5f3f9;
+        }
+        .gapi-analytics-data-chart-table-styles-th {
+          border-bottom:1px solid #e8e8e8;
+          padding:12px 8px 3px;
+        }
+        .gapi-analytics-data-chart-table-styles-td {
+          padding:8px 8px 7px;
+        }
+        .gapi-analytics-data-chart-table-styles-th,
+        .gapi-analytics-data-chart-table-styles-td {
+          text-align:right;
+        }
+        .gapi-analytics-data-chart-table-styles-th:first-child,
+        .gapi-analytics-data-chart-table-styles-td:first-child {
+          text-align:left;
+        }
+      </style>
+    </template>
+    <div id="container"></div>
+  </template>
+  <script>
+
+    Polymer('google-analytics-chart', {
+
+      /**
+       * The `ids` attribute is the unique table ID of the form ga:XXXX,
+       * where XXXX is the Analytics view (profile) ID for which the query
+       * will retrieve the data.
+       *
+       * @attribute ids
+       * @type string
+       */
+      ids: null,
+
+      /**
+       * The `startDate` attribute is the start date for fetching Analytics
+       * data. Requests can specify a start date formatted as YYYY-MM-DD, or
+       * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+       * positive integer).
+       *
+       * @attribute startDate
+       * @type string
+       */
+      startDate: '7daysAgo',
+
+      /**
+       * The `endDate` attribute is the end date for fetching Analytics
+       * data. Requests can specify an end date formatted as YYYY-MM-DD, or
+       * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+       * positive integer).
+       *
+       * @attribute endDate
+       * @type string
+       */
+      endDate: 'yesterday',
+
+      /**
+       * The `metrics` attribute is a list of comma-separated metrics,
+       * such as ga:sessions,ga:bounces.
+       *
+       * @attribute metrics
+       * @type string
+       */
+      metrics: null,
+
+      /**
+       * The `dimensions` attribute is a list of comma-separated dimensions
+       * for your Analytics data, such as ga:browser,ga:city.
+       *
+       * @attribute dimensions
+       * @type string
+       */
+      dimensions: null,
+
+      /**
+       * The `sort` attribute is a list of comma-separated dimensions
+       * and metrics indicating the sorting order and sorting direction for
+       * the returned data.
+       *
+       * @attribute sort
+       * @type string
+       */
+      sort: null,
+
+      /**
+       * The `filters` attribute is dimension or metric filters that restrict
+       * the data returned for your request.
+       *
+       * @attribute filters
+       * @type string
+       */
+      filters: null,
+
+      /**
+       * The `maxResults` attribute is the maximum number of rows to include in
+       * the response.
+       *
+       * @attribute maxResults
+       * @type integer
+       */
+      maxResults: 1000,
+
+      /**
+       * The `chartType` attribute is the Google charts type to be used.
+       *
+       * @attribute chartType
+       * @type string
+       */
+      chartType: 'line',
+
+      /**
+       * The `chartOptions` attribute is a JSON string representing an options
+       * object in the form expected by Google chart objects.
+       *
+       * @attribute chartOptions
+       * @type string
+       */
+      chartOptions: null,
+
+
+      ready: function() {
+        // Queue any render calls that occur before the chart object exists.
+        this.queue = [];
+      },
+
+      /**
+       * The `analyticsAuthorize` method will be invoked when the user has
+       * successfully signed in and this has been reported to the underlying
+       * analytics library. `gapi.analytics.auth.isAuthorized()` will be true.
+       *
+       * @method analyticsAuthorize
+       */
+      analyticsAuthorize: function() {
+
+        var query = {};
+        if (this.ids) query.ids = this.ids;
+        if (this.startDate) query['start-date'] = this.startDate;
+        if (this.endDate) query['end-date'] = this.endDate;
+        if (this.metrics) query.metrics = this.metrics;
+        if (this.dimensions) query.dimensions = this.dimensions;
+        if (this.sort) query.sort = this.sort;
+        if (this.filters) query.filters = this.filters;
+        if (this.maxResults) query['max-results'] = this.maxResults;
+
+        this.chart = new gapi.analytics.googleCharts.DataChart({
+          query: query,
+          chart: {
+            container: this.$.container,
+            type: this.chartType.toUpperCase(),
+            options: JSON.parse(this.chartOptions)
+          }
+        });
+
+        // Update the chart query option with any queued values.
+        for (var i = 0, item; item = this.queue[i]; i++) {
+          this.chart.set({query: item});
+        }
+
+        this.render();
+      },
+
+      /**
+       * The `render` method will make a request to the Google Analytics core
+       * reporting API and render the results in the instance's chart object.
+       * Calls to `render` that occur before the chart object exists will be
+       * queued and executed in `analyticsAuthorize`.
+       *
+       * @method render
+       * @param {Object} [query] - Optional query parameters.
+       */
+      render: function(query) {
+        // If the chart doesn't exist queue these queries to be
+        // executed as soon as it does.
+        if (!this.chart) {
+          this.queue.push(query);
+          return;
+        }
+
+        if (query) {
+          this.chart.set({query: query});
+        }
+
+        if (this.isValid()) {
+          this.chart.execute();
+        }
+      },
+
+      /**
+       * The `isValid` method checks to make sure the query contains the
+       * minimum parameters necessary for a successful request.
+       *
+       * @method isValid
+       * @return {boolean} - Whether or not the query is valid.
+       */
+      isValid: function() {
+        var q = this.chart.get().query;
+        return !!(q.ids && q.metrics && q['start-date'] && q['end-date']);
+      },
+
+      /**
+       * The `isTypeTable` method checks whether this instance has a
+       * `chartType` of "table".
+       *
+       * @method isTypeTable
+       * @return {boolean} - Whether or not the `chartType` is "table".
+       */
+      isTypeTable: function(type) {
+        return type.toLowerCase() == 'table';
+      }
+    });
+
+  </script>
+
+</polymer-element>

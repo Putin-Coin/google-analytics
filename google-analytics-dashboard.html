@@ -1,0 +1,60 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element for grouping Google Analytics elements together.
+
+`<google-analytics-chart>` elements inside a `<google-analytics-dashboard>`
+element will automatically update as control elements (e.g.
+`<google-analytics-view-selector>` or `<google-analytics-date-selector>`)
+update query parameters.
+
+##### Example
+
+    <google-analytics-dashboard>
+
+      <google-analytics-view-selector></google-analytics-view-selector>
+      <google-analytics-date-selector></google-analytics-date-selector>
+
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:country"
+        sort="-ga:sessions"
+        maxResults="5"
+        chartType="column">
+      </google-analytics-chart>
+
+    </google-analytics-dashboard>
+
+@element google-analytics-dashboard
+@blurb Element for grouping Google Analytics control and visualization elements.
+@status alpha
+@homepage http://polymerlabs.github.io/google-analytics
+-->
+
+<polymer-element name="google-analytics-dashboard">
+  <script>
+
+    Polymer('google-analytics-dashboard', {
+      ready: function() {
+
+        this.addEventListener('analytics-query-change', function(event) {
+
+          // When components inside a google-analytics-dashboard element fire the
+          // analytics-query-change event, they will pass along the
+          // query paramters that have changed.
+          var charts = this.querySelectorAll('google-analytics-chart');
+          for (var i = 0, chart; chart = charts[i]; i++) {
+            chart.render(event.detail);
+          }
+
+          // This event is only relevant to google-analytics-dashboard elements
+          // and their children, so no need to bubble up to the document
+          event.stopPropagation();
+
+        }.bind(this));
+      }
+    });
+
+  </script>
+
+</polymer-element>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Polymer Test</title>
+  <script src="../platform/platform.js"></script>
+  <link rel="import" href="../google-signin/google-signin.html">
+  <link rel="import" href="google-analytics.html">
+
+  <style>
+    body {
+      font: 13px sans-serif;
+      margin: 0;
+      padding: 1.5em;
+    }
+    google-signin,
+    google-analytics-view-selector,
+    google-analytics-date-selector {
+      margin-bottom: 1.5em;
+    }
+    google-analytics-view-selector,
+    google-analytics-date-selector {
+      display: block;
+    }
+    .chart {
+      background: #fff;
+      border: 1px solid #ccc;
+      margin: 0 1.5em 1.5em 0;
+      padding: 1em 1.5em;
+      float: left;
+    }
+    .chart h3 {
+      border: 0;
+      font-size: 1.3em;
+      font-weight: 300;
+      margin: .5em 0;
+    }
+  </style>
+
+</head>
+<body unresolved>
+
+  <google-signin
+    clientId="1054047045356-j8pgqgls9vdef3rl09hapoicumbte0bo.apps.googleusercontent.com"
+    scopes="https://www.googleapis.com/auth/analytics.readonly">
+  </google-signin>
+
+  <google-analytics-dashboard>
+
+    <google-analytics-view-selector></google-analytics-view-selector>
+    <google-analytics-date-selector></google-analytics-date-selector>
+
+    <div class="chart">
+      <h3>Traffic over time</h3>
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:date"
+        chartType="line">
+      </google-analytics-chart>
+    </div>
+
+    <div class="chart">
+      <h3>Top countries</h3>
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:country"
+        chartType="geo">
+      </google-analytics-chart>
+    </div>
+
+    <div class="chart">
+      <h3>Top browsers</h3>
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:browser"
+        sort="-ga:sessions"
+        maxResults="5"
+        chartType="column">
+      </google-analytics-chart>
+    </div>
+
+  </google-analytics-dashboard>
+
+</body>
+</html>

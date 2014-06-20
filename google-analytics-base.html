@@ -1,0 +1,107 @@
+<script>
+// Create the gapi.analytics.ready placeholder since other plugins
+// might use it before the analytics library is fully loaded.
+window.gapi || (window.gapi = {});
+window.gapi.analytics || (window.gapi.analytics = {
+  q:[], ready: function(cb) { this.q.push(cb); }
+});
+</script>
+
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+The base element for other google analytics elements. This element is not
+intended to be used by itself. It is only intended to be subclassed.
+
+@element google-analytics-base
+@blurb Base element for other google analytics elements
+@status alpha
+@homepage http://polymerlabs.github.io/google-analytics
+-->
+
+<polymer-element name="google-analytics-base">
+  <template if="{{ !loaded }}">
+    <google-client-api on-api-load="{{ loadDependencies }}"></google-client-api>
+  </template>
+
+  <script>
+
+    Polymer('google-analytics-base', {
+
+      /**
+       * The `loaded` attribute is true when the underlying analytics library
+       * is fully loaded.
+       *
+       * @attribute loaded
+       * @type boolean
+       */
+      loaded: false,
+
+      /**
+       * The `authorized` attribute is true once the user successfully signs in.
+       *
+       * @attribute authorized
+       * @type boolean
+       */
+      authorized: false,
+
+      created: function() {
+        // Invoke `analyticsLoad` on this (and all subclasses) once
+        // the analytics library is loaded.
+        gapi.analytics.ready(function() {
+          this.loaded = true;
+          this.analyticsLoad();
+        }.bind(this));
+
+        document.addEventListener('google-signin-success', function(event) {
+          // It's possible that signin happens before the analytics library is
+          // loaded so we have to put the auth stuff in a ready handler.
+          gapi.analytics.ready(function() {
+            if (!gapi.analytics.auth.isAuthorized()) {
+              gapi.analytics.auth.authorize({
+                serverAuth: {access_token: event.detail.result.access_token}
+              });
+            }
+            // Invoke `analyticsAuthorize` on this (and all subclasses).
+            this.authorized = true;
+            this.analyticsAuthorize();
+          }.bind(this));
+        }.bind(this));
+      },
+
+      /**
+       * The `analyticsLoad` method will be invoked when the analytics library
+       * and its dependencies are fully loaded.
+       * At this point, all the methods on `gapi.analytics` are available.
+       *
+       * @method analyticsLoad
+       */
+      analyticsLoad: function() {
+        // Override in sub-element.
+      },
+
+      /**
+       * The `analyticsAuthorize` method will be invoked when the user has
+       * successfully signed in and this has been reported to the underlying
+       * analytics library. `gapi.analytics.auth.isAuthorized()` will be true.
+       *
+       * @method analyticsAuthorize
+       */
+      analyticsAuthorize: function() {
+        // Override in sub-element.
+      },
+
+      /**
+       * The `loadDependencies` callback is invoked once `<google-client-api>`
+       * loads.
+       *
+       * @method loadDependencies
+       */
+      loadDependencies: function() {
+        gapi.load('analytics');
+      }
+    });
+
+  </script>
+
+</polymer-element>
