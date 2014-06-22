@@ -1,11 +1,30 @@
 <link rel="import" href="google-analytics-base.html">
 
+<!--
+Element for querying the Google Analytics Core Reporting API.
+
+##### Example
+
+    <google-analytics-query
+      ids="ga:1174"
+      metrics="ga:sessions"
+      dimensions="ga:country"
+      sort="-ga:sessions"
+      maxResults="5">
+    </google-analytics-chart>
+
+@element google-analytics-query
+@extends google-analytics-base
+@blurb Element for querying the Google Analytics Core Reporting API.
+@status alpha
+@homepage http://polymerlabs.github.io/google-analytics
+-->
+
 <polymer-element
   name="google-analytics-query"
   extends="google-analytics-base"
   attributes="
     data
-    output
     ids
     startDate
     endDate
@@ -13,21 +32,165 @@
     dimensions
     sort
     filters
-    maxResults">
+    segment
+    samplingLevel
+    startIndex
+    maxResults
+    output
+    fields
+    ">
 
   <script>
 
     (function() {
 
       Polymer('google-analytics-query', {
+        /**
+         * Fired when a query is successfully run and data has been stored.
+         *
+         * @event analytics-query-success
+         */
 
+        /**
+         * Fired when an error occurs while running a query.
+         *
+         * @event analytics-query-error
+         */
+
+        /**
+         * The `data` attribute is the response from a query to the Google
+         * Analytics Core Reporting API. This value will be updated as
+         * subsequent requests are made.
+         *
+         * @attribute data
+         * @type object
+         */
+        data: null,
+
+        /**
+         * The `ids` attribute is the unique table ID of the form ga:XXXX,
+         * where XXXX is the Analytics view (profile) ID for which the query
+         * will retrieve the data.
+         *
+         * @attribute ids
+         * @type string
+         */
+        ids: null,
+
+        /**
+         * The `startDate` attribute is the start date for fetching Analytics
+         * data. Requests can specify a start date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * @attribute startDate
+         * @type string
+         */
         startDate: '7daysAgo',
 
+        /**
+         * The `endDate` attribute is the end date for fetching Analytics
+         * data. Requests can specify an end date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * @attribute endDate
+         * @type string
+         */
         endDate: 'yesterday',
 
-        output: 'json',
+        /**
+         * The `metrics` attribute is a list of comma-separated metrics,
+         * such as ga:sessions,ga:bounces.
+         *
+         * @attribute metrics
+         * @type string
+         */
+        metrics: null,
 
-        data: null,
+        /**
+         * The `dimensions` attribute is a list of comma-separated dimensions
+         * for your Analytics data, such as ga:browser,ga:city.
+         *
+         * @attribute dimensions
+         * @type string
+         */
+        dimensions: null,
+
+        /**
+         * The `sort` attribute is a list of comma-separated dimensions
+         * and metrics indicating the sorting order and sorting direction for
+         * the returned data.
+         *
+         * @attribute sort
+         * @type string
+         */
+        sort: null,
+
+        /**
+         * The `filters` attribute is dimension or metric filters that restrict
+         * the data returned for your request.
+         *
+         * @attribute filters
+         * @type string
+         */
+        filters: null,
+
+        /**
+         * The `maxResults` attribute segments the data returned for your
+         * request.
+         *
+         * @attribute segment
+         * @type string
+         */
+        segment: null,
+
+        /**
+         * The `maxResults` attribute sets the desired sampling level.
+         * Allowed Values: `DEFAULT`, `FASTER`, `HIGHER_PRECISION`.
+         *
+         * @attribute samplingLevel
+         * @type string
+         */
+        samplingLevel: null,
+
+        /**
+         * The `startIndex` attribute sets the first row of data to retrieve,
+         * starting at 1. Use this parameter as a pagination mechanism along
+         * with the max-results parameter.
+         *
+         * @attribute startIndex
+         * @type integer
+         */
+        startIndex: null,
+
+        /**
+         * The `maxResults` attribute is the maximum number of rows to include
+         * in the response.
+         *
+         * @attribute maxResults
+         * @type integer
+         */
+        maxResults: 1000,
+
+        /**
+         * The `output` attribute sets the desired output type for the
+         * Analytics data returned in the response. Acceptable values are json
+         * and dataTable.
+         *
+         * @attribute output
+         * @type string
+         */
+        output: null,
+
+        /**
+         * The `fields` attribute is a selector specifying a subset of
+         * fields to include in the response.
+         *
+         * @attribute fields
+         * @type string
+         */
+        fields: null,
 
         observe: {
           ids: 'getData',
@@ -37,33 +200,57 @@
           dimensions: 'getData',
           sort: 'getData',
           filters: 'getData',
-          maxResults: 'getData'
+          segment: 'getData',
+          samplingLevel: 'getData',
+          startIndex: 'getData',
+          maxResults: 'getData',
+          output: 'getData',
+          fields: 'getData'
         },
 
-        analyticsAuthorize: function(data) {
+        analyticsAuthorize: function() {
           this.super();
           this.getData();
         },
 
+        /**
+         * Query the Google Analytics Core Reporting API.
+         *
+         * @method getData
+         */
         getData: function() {
           if (this.authorized && this.isValid()) {
+
+            // Required paramters.
             var query = {
               'ids': this.ids,
               'start-date': this.startDate,
               'end-date': this.endDate,
-              'metrics': this.metrics,
-              'output': this.output
+              'metrics': this.metrics
             };
+
+            // Optional parameters.
             if (this.dimensions) query.dimensions = this.dimensions;
             if (this.sort) query.sort = this.sort;
             if (this.filters) query.filters = this.filters;
+            if (this.segment) query.segment = this.segment;
+            if (this.samplingLevel) query.samplingLevel = this.samplingLevel;
+            if (this.startIndex) query['start-index'] = this.startIndex;
             if (this.maxResults) query['max-results'] = this.maxResults;
+            if (this.output) query.output = this.output;
+            if (this.fields) query.fields = this.fields;
 
             gapi.client.analytics.data.ga.get(query)
                 .execute(this.handleResponse.bind(this));
           }
         },
 
+        /**
+         * The callback for the query run in `getData`. This is a separate
+         * function so subclasses can alter how the response is handled.
+         *
+         * @method handleResponse
+         */
         handleResponse: function(response) {
           if (response.error) {
             this.fire('analytics-query-error', response.error);
@@ -83,10 +270,9 @@
          */
         isValid: function() {
           return !!(this.ids && this.metrics && this.startDate && this.endDate);
-        },
+        }
 
       });
-
 
     }());
 

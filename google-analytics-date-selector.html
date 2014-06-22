@@ -22,6 +22,7 @@ Element for selecting the start and end date values for queries inside a
     </google-analytics-dashboard>
 
 @element google-analytics-date-selector
+@extends google-analytics-base
 @blurb Element for selecting the start and end date values for Google Analytics
 queries
 @status alpha
@@ -34,28 +35,35 @@ queries
   attributes="startDate endDate minStartDate maxEndDate">
 
   <template>
-    <label>
-      Start Date
+    <span class="control">
+      <label for="startDate">Start Date</label>
       <input
         id="startDate"
         type="date"
         value="{{startDate}}"
         min="{{minStartDate}}"
         max="{{endDate}}">
-    </label>
-    <label>
-      End Date
+    </span>
+    <span class="control">
+      <label for="endDate">End Date</label>
       <input
         id="endDate"
         type="date"
         value="{{endDate}}"
         min="{{startDate}}"
         max="{{maxEndDate}}">
-    </label>
+    </span>
   </template>
   <script>
 
     (function() {
+      /**
+       * Fired when the users changes the start or end date.
+       *
+       * @param {Object} query The updated query params.
+       * @event analytics-dashboard-control-change
+       */
+
 
       var nDaysAgo = /(\d+)daysAgo/;
       var dateFormat = /\d{4}\-\d{2}\-\d{2}/;
@@ -109,12 +117,12 @@ queries
 
         startDateChanged: function() {
           this.$.startDate.value = convertDate(this.startDate);
-          this.fire('analytics-query-change', { startDate: this.startDate });
+          this.fire('analytics-dashboard-control-change', { startDate: this.startDate });
         },
 
         endDateChanged: function() {
           this.$.endDate.value = convertDate(this.endDate);
-          this.fire('analytics-query-change', { endDate: this.endDate });
+          this.fire('analytics-dashboard-control-change', { endDate: this.endDate });
         }
       });
 

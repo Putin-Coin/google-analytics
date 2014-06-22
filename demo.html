@@ -4,81 +4,17 @@
   <meta charset="utf-8">
   <title>Polymer Test</title>
   <script src="../platform/platform.js"></script>
+  <link rel="stylesheet" href="demo.css">
   <link rel="import" href="../google-signin/google-signin.html">
-
   <link rel="import" href="google-analytics.html">
 
-  <style>
-    body {
-      font: 13px sans-serif;
-      margin: 0;
-      padding: 1.5em;
-    }
-    google-signin,
-    google-analytics-view-selector,
-    google-analytics-date-selector {
-      margin-bottom: 1.5em;
-    }
-    google-analytics-view-selector,
-    google-analytics-date-selector {
-      display: block;
-    }
-    .chart {
-      background: #fff;
-      border: 1px solid #ccc;
-      margin: 0 1.5em 1.5em 0;
-      padding: 1em 1.5em;
-      float: left;
-    }
-    .chart h3 {
-      border: 0;
-      font-size: 1.3em;
-      font-weight: 300;
-      margin: .5em 0;
-    }
-
-
-    input {
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      outline: none;
-      padding: .5em;
-    }
-    * /deep/ input {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      outline: none;
-      padding: .5em;
-    }
-
-    google-analytics-dashboard {
-      display: none;
-    }
-    google-analytics-dashboard[authorized] {
-      display: block;
-    }
-
-/*
-    google-analytics-chart {
-      border: 1px solid #ccc;
-      background: #fff;
-      display: inline-block;
-    }
-
-    google-analytics-chart header {
-      font: 300 1.4em/1 sans-serif;
-      margin: .5em 0;
-    }*/
-
-  </style>
 
 </head>
 <body unresolved>
 
   <script>
-    document.addEventListener('analytics-query-success', function(response) {
-      // console.log(response.detail);
+    document.addEventListener('analytics-query-error', function(event) {
+      console.error(event.detail);
     });
   </script>
 
@@ -87,73 +23,50 @@
     scopes="https://www.googleapis.com/auth/analytics.readonly">
   </google-signin>
 
-  <!-- <google-analytics-query
-    output="dataTable"
-    ids="ga:1174"
-    metrics="ga:sessions"
-    dimensions="ga:date">
-  </google-analytics-query> -->
-
-<!--   <google-analytics-datachart
-    type="area"
-    ids="ga:1174"
-    metrics="ga:users"
-    dimensions="ga:date">
-  </google-analytics-datachart>
-
-  <google-analytics-datachart
-    type="geo"
-    ids="ga:1174"
-    metrics="ga:sessions"
-    dimensions="ga:country"
-    sort="-ga:sessions"
-    maxResults="5">
-  </google-analytics-datachart>
-
-  <google-analytics-datachart
-    type="column"
-    ids="ga:1174"
-    metrics="ga:pageviews"
-    dimensions="ga:country"
-    sort="-ga:pageviews"
-    maxResults="5">
-  </google-analytics-datachart>
-
-  <google-analytics-datachart
-    type="bar"
-    ids="ga:1174"
-    metrics="ga:sessions"
-    dimensions="ga:country"
-    sort="-ga:sessions"
-    maxResults="5">
-  </google-analytics-datachart> -->
-
   <google-analytics-dashboard>
 
     <google-analytics-view-selector></google-analytics-view-selector>
     <google-analytics-date-selector></google-analytics-date-selector>
 
-      <google-analytics-datachart
-        type="area"
-        metrics="ga:users"
-        dimensions="ga:date">
-      </google-analytics-datachart>
+      <div class="chart">
+        <h3>Traffic Timeline</h3>
+        <google-analytics-chart
+          type="area"
+          metrics="ga:sessions"
+          dimensions="ga:date">
+        </google-analytics-chart>
+      </div>
 
-      <google-analytics-datachart
-        type="geo"
-        metrics="ga:sessions"
-        dimensions="ga:country"
-        sort="-ga:sessions"
-        maxResults="5">
-      </google-analytics-datachart>
+      <div class="chart">
+        <h3>Page Loads</h3>
+        <google-analytics-chart
+          type="column"
+          metrics="ga:pageLoadTime"
+          dimensions="ga:date">
+        </google-analytics-chart>
+      </div>
 
-      <google-analytics-datachart
-        type="column"
-        metrics="ga:pageviews"
-        dimensions="ga:country"
-        sort="-ga:pageviews"
-        maxResults="5">
-      </google-analytics-datachart>
+      <div class="chart">
+        <h3>Users by Country</h3>
+        <google-analytics-chart
+          type="bar"
+          metrics="ga:users"
+          dimensions="ga:country"
+          sort="-ga:users"
+          maxResults="5">
+        </google-analytics-chart>
+      </div>
+
+      <div class="chart">
+        <h3>Pageviews by Browser</h3>
+        <google-analytics-chart
+          type="pie"
+          metrics="ga:pageviews"
+          dimensions="ga:browser"
+          sort="-ga:pageviews"
+          maxResults="5">
+        </google-analytics-chart>
+      </div>
 
   </google-analytics-dashboard>
 

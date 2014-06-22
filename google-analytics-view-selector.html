@@ -1,4 +1,4 @@
-<link rel="import" href="../native-promise-only/">
+<link rel="import" href="../native-promise-only/lib/npo.src.js">
 
 <!--
 Element for selecting the view ID (ids) value for queries inside a
@@ -18,6 +18,7 @@ Element for selecting the view ID (ids) value for queries inside a
     </google-analytics-dashboard>
 
 @element google-analytics-view-selector
+@extends google-analytics-base
 @blurb Element for selecting the ids value for Google Analytics queries
 @status alpha
 @homepage http://polymerlabs.github.io/google-analytics
@@ -28,30 +29,30 @@ Element for selecting the view ID (ids) value for queries inside a
   extends="google-analytics-base">
 
   <template>
-    <label>
-      Account
+    <span class="control">
+      <label for="account">Account</label>
       <select id="account" on-change="{{changeAccount}}">
         <template repeat="{{account,i in accounts}}">
           <option value="{{i}}">{{account.name}}</option>
         </template>
       </select>
-    </label>
-    <label>
-      Property
+    </span>
+    <span class="control">
+      <label>Property</label>
       <select id="property" on-change="{{changeProperty}}">
         <template repeat="{{property,i in properties}}">
           <option value="{{i}}">{{property.name}}</option>
         </template>
       </select>
-    </label>
-    <label>
-      View
+    </span>
+    <span class="control">
+      <label>View</label>
       <select id="view" on-change="{{changeView}}">
         <template repeat="{{view,i in views}}">
           <option value="{{view.ids}}">{{view.name}}</option>
         </template>
       </select>
-    </label>
+    </span>
   </template>
 
   <script>
@@ -59,6 +60,13 @@ Element for selecting the view ID (ids) value for queries inside a
     (function() {
 
       Polymer('google-analytics-view-selector', {
+        /**
+         * Fired when the users changes the view
+         *
+         * @param {Object} query The updated query params.
+         * @event analytics-dashboard-control-change
+         */
+
 
         /**
          * The `accounts` attribute is used to populate the `<option>`
@@ -143,7 +151,7 @@ Element for selecting the view ID (ids) value for queries inside a
         },
 
         idsChanged: function() {
-          this.fire('analytics-query-change', {ids: this.ids});
+          this.fire('analytics-dashboard-control-change', {ids: this.ids});
         }
 
       });

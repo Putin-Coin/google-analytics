@@ -52,7 +52,6 @@ intended to be used by itself. It is only intended to be subclassed.
 
         created: function() {
           document.addEventListener('google-signin-success', function(event) {
-            isAuthorized = true;
             this.analyticsAuthorize(event.detail.result);
           }.bind(this));
         },
@@ -65,7 +64,7 @@ intended to be used by itself. It is only intended to be subclassed.
          * @method analyticsLoad
          */
         analyticsLoad: function() {
-          this.loaded = true;
+          isLoaded = true;
         },
 
         /**
@@ -77,7 +76,7 @@ intended to be used by itself. It is only intended to be subclassed.
          * @param {Object} data - The auth data information.
          */
         analyticsAuthorize: function(data) {
-          this.authorized = true;
+          isAuthorized = true;
         }
 
       });
