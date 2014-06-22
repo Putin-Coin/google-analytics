@@ -36,11 +36,8 @@ intended to be used by itself. It is only intended to be subclassed.
           var lib = event.detail;
           if (lib.name == 'analytics' && lib.version == 'v3') {
             isLoaded = true;
-            resolve(event.detail)
+            resolve(event.detail);
           }
-        })
-        document.addEventListener('google-api-load-error', function(event) {
-          reject(event.detail)
         });
       });
 
@@ -83,10 +80,7 @@ intended to be used by itself. It is only intended to be subclassed.
               .then(function(value) {
                 var authorizedPromiseValue = value[1];
                 this.authorized(authorizedPromiseValue);
-              }.bind(this))
-              .catch(function(err) {
-                console.error(err.stack || err);
-              });
+              }.bind(this));
         },
 
         /**
