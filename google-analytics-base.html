@@ -41,7 +41,7 @@ intended to be used by itself. It is only intended to be subclassed.
         })
         document.addEventListener('google-api-load-error', function(event) {
           reject(event.detail)
-        })
+        });
       });
 
       /**
@@ -51,9 +51,6 @@ intended to be used by itself. It is only intended to be subclassed.
         document.addEventListener('google-signin-success', function(event) {
           isAuthorized = true;
           resolve(event.detail.result);
-        });
-        document.addEventListener('google-signin-failure', function(event) {
-          reject(event.detail.result);
         });
       });
 
