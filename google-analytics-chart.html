@@ -71,7 +71,9 @@ Google Chart.
         }
       </style>
     </template>
-    <div id="container"></div>
+    <content select="header"></content>
+    <div id="chart"></div>
+    <content select="footer"></content>
   </template>
   <script>
 
@@ -200,7 +202,7 @@ Google Chart.
         this.chart = new gapi.analytics.googleCharts.DataChart({
           query: query,
           chart: {
-            container: this.$.container,
+            container: this.$.chart,
             type: this.chartType.toUpperCase(),
             options: JSON.parse(this.chartOptions)
           }

@@ -30,6 +30,7 @@ queries
 
 <polymer-element
   name="google-analytics-date-selector"
+  extends="google-analytics-base"
   attributes="startDate endDate minStartDate maxEndDate">
 
   <template>
@@ -107,17 +108,13 @@ queries
         },
 
         startDateChanged: function() {
-          var query = { 'start-date': this.startDate };
           this.$.startDate.value = convertDate(this.startDate);
-
-          this.fire('analytics-query-change', query);
+          this.fire('analytics-query-change', { startDate: this.startDate });
         },
 
         endDateChanged: function() {
-          var query = { 'end-date': this.endDate };
           this.$.endDate.value = convertDate(this.endDate);
-
-          this.fire('analytics-query-change', query);
+          this.fire('analytics-query-change', { endDate: this.endDate });
         }
       });
 

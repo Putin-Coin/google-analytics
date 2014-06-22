@@ -87,9 +87,11 @@ Element for selecting the view ID (ids) value for queries inside a
          */
         views: [],
 
-        analyticsAuthorize: function() {
+        analyticsAuthorize: function(data) {
 
           accountSummaries.get().then(function(accounts) {
+
+            this.setAttribute('resolved', '');
 
             this.accounts = accounts;
             this.properties = this.accounts[0].properties;

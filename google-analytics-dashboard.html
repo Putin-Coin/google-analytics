@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="google-analytics-base.html">
 
 <!--
 Element for grouping Google Analytics elements together.
@@ -31,7 +31,14 @@ update query parameters.
 @homepage http://polymerlabs.github.io/google-analytics
 -->
 
-<polymer-element name="google-analytics-dashboard">
+<polymer-element
+  name="google-analytics-dashboard"
+  extends="google-analytics-base">
+
+  <template>
+    <content></content>
+  </template>
+
   <script>
 
     Polymer('google-analytics-dashboard', {
@@ -42,9 +49,12 @@ update query parameters.
           // When components inside a google-analytics-dashboard element fire the
           // analytics-query-change event, they will pass along the
           // query paramters that have changed.
-          var charts = this.querySelectorAll('google-analytics-chart');
+          var charts = this.querySelectorAll('google-analytics-datachart');
           for (var i = 0, chart; chart = charts[i]; i++) {
-            chart.render(event.detail);
+            Object.keys(event.detail).forEach(function(key) {
+              console.log(key, event.detail[key]);
+              chart[key] = event.detail[key];
+            })
           }
 
           // This event is only relevant to google-analytics-dashboard elements
@@ -52,7 +62,16 @@ update query parameters.
           event.stopPropagation();
 
         }.bind(this));
+      },
+
+      analyticsLoad: function() {
+        this.setAttribute('loaded', '');
+      },
+
+      analyticsAuthorize: function() {
+        this.setAttribute('authorized', '');
       }
+
     });
 
   </script>
