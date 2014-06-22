@@ -1,6 +1,5 @@
 <link rel="import" href="google-analytics-base.html">
 <link rel="import" href="../google-chart/google-chart.html">
-<link rel="import" href="../native-promise-only/lib/npo.src.js">
 
 <!--
 Element for displaying the results of a Google Analytics query in a
@@ -100,9 +99,7 @@ Google Chart.
           merge(this.$.chart.options, getChartOptions(this.type), this.options);
         },
 
-        analyticsAuthorize: function() {
-          this.super();
-
+        authorized: function() {
           // Get metadata as soon as possible so we don't have to wait later.
           metadata.get();
         },
@@ -154,7 +151,7 @@ Google Chart.
           get: function() {
             promise = promise || queryMetadataAPI();
             return promise.catch(function(err) {
-              console.error(err.stack);
+              console.error(err.stack || err);
             });
           }
         };
@@ -172,6 +169,9 @@ Google Chart.
             chartArea: {
               width: '100%'
             },
+            hAxis: {
+              format: 'MMM d'
+            },
             legend: {
               position: 'top',
               alignment: 'start'
@@ -183,7 +183,6 @@ Google Chart.
             areaOpacity: 0.1,
             colors: ['#058dc7', '#aadff3'],
             hAxis: {
-              format: 'MMM d',
               gridlines: {
                 color: 'transparent'
               },

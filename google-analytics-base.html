@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../google-apis/google-client-api.html">
+<link rel="import" href="../native-promise-only/lib/npo.src.js">
 
 <!--
 The base element for other google analytics elements. This element is not
@@ -13,10 +14,9 @@ intended to be used by itself. It is only intended to be subclassed.
 
 <polymer-element name="google-analytics-base">
   <template>
-    <google-api-loader id="analytics"
+    <google-api-loader
       name="analytics"
-      version="v3"
-      on-google-api-load="{{analyticsLoad}}">
+      version="v3">
     </google-api-loader>
   </template>
 
@@ -27,6 +27,36 @@ intended to be used by itself. It is only intended to be subclassed.
       var isLoaded = false;
       var isAuthorized = false;
 
+      /**
+       * A promise that is resolved when the underlying client libraries are
+       * loaded.
+       */
+      var loadPromise = new Promise(function(resolve, reject) {
+        document.addEventListener('google-api-load', function(event) {
+          var lib = event.detail;
+          if (lib.name == 'analytics' && lib.version == 'v3') {
+            isLoaded = true;
+            resolve(event.detail)
+          }
+        })
+        document.addEventListener('google-api-load-error', function(event) {
+          reject(event.detail)
+        })
+      });
+
+      /**
+       * A promise that is resolved once the user has successfully signed in.
+       */
+      var authorizedPromise = new Promise(function(resolve, reject) {
+        document.addEventListener('google-signin-success', function(event) {
+          isAuthorized = true;
+          resolve(event.detail.result);
+        });
+        document.addEventListener('google-signin-failure', function(event) {
+          reject(event.detail.result);
+        });
+      });
+
       Polymer('google-analytics-base', {
 
         /**
@@ -36,7 +66,7 @@ intended to be used by itself. It is only intended to be subclassed.
          * @attribute loaded
          * @type boolean
          */
-        get loaded() {
+        get isLoaded() {
           return isLoaded;
         },
 
@@ -46,37 +76,32 @@ intended to be used by itself. It is only intended to be subclassed.
          * @attribute authorized
          * @type boolean
          */
-        get authorized() {
+        get isAuthorized() {
           return isAuthorized;
         },
 
         created: function() {
-          document.addEventListener('google-signin-success', function(event) {
-            this.analyticsAuthorize(event.detail.result);
-          }.bind(this));
+          Promise
+              .all([loadPromise, authorizedPromise])
+              .then(function(value) {
+                var authorizedPromiseValue = value[1];
+                this.authorized(authorizedPromiseValue);
+              }.bind(this))
+              .catch(function(err) {
+                console.error(err.stack || err);
+              });
         },
 
         /**
-         * The `analyticsLoad` method will be invoked when the analytics library
-         * and its dependencies are fully loaded.
-         * At this point, all the methods on `gapi.analytics` are available.
+         * The `authorized` method will be invoked when the user has
+         * successfully signed in and all the underlying client libraries
+         * have been loaded.
          *
-         * @method analyticsLoad
-         */
-        analyticsLoad: function() {
-          isLoaded = true;
-        },
-
-        /**
-         * The `analyticsAuthorize` method will be invoked when the user has
-         * successfully signed in and this has been reported to the underlying
-         * analytics library. `gapi.analytics.auth.isAuthorized()` will be true.
-         *
-         * @method analyticsAuthorize
+         * @method authorized
          * @param {Object} data - The auth data information.
          */
-        analyticsAuthorize: function(data) {
-          isAuthorized = true;
+        authorized: function(data) {
+          // Override in a subclass.
         }
 
       });

@@ -208,8 +208,18 @@ Element for querying the Google Analytics Core Reporting API.
           fields: 'getData'
         },
 
-        analyticsAuthorize: function() {
-          this.super();
+        /**
+         * The `isValid` attribute checks to make sure the query contains the
+         * minimum parameters necessary for a successful request.
+         *
+         * @attribute isValid
+         * @return {boolean} - Whether or not the query is valid.
+         */
+        get isValid() {
+          return !!(this.ids && this.metrics && this.startDate && this.endDate);
+        },
+
+        authorized: function() {
           this.getData();
         },
 
@@ -219,7 +229,7 @@ Element for querying the Google Analytics Core Reporting API.
          * @method getData
          */
         getData: function() {
-          if (this.authorized && this.isValid()) {
+          if (this.isAuthorized && this.isValid) {
 
             // Required paramters.
             var query = {
@@ -259,17 +269,6 @@ Element for querying the Google Analytics Core Reporting API.
             this.data = response;
             this.fire('analytics-query-success', response);
           }
-        },
-
-        /**
-         * The `isValid` method checks to make sure the query contains the
-         * minimum parameters necessary for a successful request.
-         *
-         * @method isValid
-         * @return {boolean} - Whether or not the query is valid.
-         */
-        isValid: function() {
-          return !!(this.ids && this.metrics && this.startDate && this.endDate);
         }
 
       });

@@ -1,4 +1,4 @@
-<link rel="import" href="../native-promise-only/lib/npo.src.js">
+<link rel="import" href="google-analytics-base.html">
 
 <!--
 Element for selecting the view ID (ids) value for queries inside a
@@ -95,7 +95,7 @@ Element for selecting the view ID (ids) value for queries inside a
          */
         views: [],
 
-        analyticsAuthorize: function(data) {
+        authorized: function(data) {
 
           accountSummaries.get().then(function(accounts) {
 
@@ -240,7 +240,7 @@ Element for selecting the view ID (ids) value for queries inside a
               requestAccountSummaries()
                 .then(trimAccountSummaries)
                 .catch(function(err) {
-                  console.error(err.stack);
+                  console.error(err.stack || err);
                 })
               );
           }

@@ -64,13 +64,7 @@ update query parameters.
         }.bind(this));
       },
 
-      analyticsLoad: function() {
-        this.super();
-        this.setAttribute('loaded', '');
-      },
-
-      analyticsAuthorize: function() {
-        this.super();
+      authorized: function() {
         this.setAttribute('authorized', '');
       }
 

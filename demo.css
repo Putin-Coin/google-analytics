@@ -8,14 +8,17 @@ body {
 /**
  * .control styles.
  */
-* /deep/ .control {
+ google-analytics-view-selector::shadow .control,
+ google-analytics-date-selector::shadow .control {
   display: inline-block;
   margin: 0 .5em 1.5em 0;
 }
-* /deep/ .control:last-child {
+google-analytics-view-selector::shadow .control:last-child,
+google-analytics-date-selector::shadow .control:last-child {
   margin-right: 0;
 }
-* /deep/ .control > label {
+google-analytics-view-selector::shadow .control > label,
+google-analytics-date-selector::shadow .control > label {
   display: block;
   padding: 0 0 .4em .3em;
 }
@@ -78,11 +81,8 @@ google-signin::shadow input {
 /**
  * <google-analytics-view-selector> styles.
  */
-google-analytics-dashboard {
+google-analytics-dashboard:not([authorized]) {
   display: none;
-}
-google-analytics-dashboard[authorized] {
-  display: block;
 }
 
 /**
