@@ -4,24 +4,21 @@
   <meta charset="utf-8">
   <title>Polymer Test</title>
   <script src="../platform/platform.js"></script>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:700,400,300">
   <link rel="stylesheet" href="demo.css">
   <link rel="import" href="../google-signin/google-signin.html">
   <link rel="import" href="google-analytics.html">
 
-
 </head>
 <body unresolved>
 
-  <script>
-    document.addEventListener('analytics-query-error', function(event) {
-      console.error(event.detail);
-    });
-  </script>
-
-  <google-signin
-    clientId="1054047045356-j8pgqgls9vdef3rl09hapoicumbte0bo.apps.googleusercontent.com"
-    scopes="https://www.googleapis.com/auth/analytics.readonly">
-  </google-signin>
+  <header>
+    <h1>Google Analytics <em>Polymer Element Demos</em></h1>
+    <google-signin
+      clientId="1054047045356-j8pgqgls9vdef3rl09hapoicumbte0bo.apps.googleusercontent.com"
+      scopes="https://www.googleapis.com/auth/analytics.readonly">
+    </google-signin>
+  </header>
 
   <google-analytics-dashboard>
 
@@ -29,7 +26,7 @@
     <google-analytics-date-selector></google-analytics-date-selector>
 
       <div class="chart">
-        <h3>Traffic Timeline</h3>
+        <h3>Site Traffic</h3>
         <google-analytics-chart
           type="area"
           metrics="ga:sessions"
@@ -38,10 +35,10 @@
       </div>
 
       <div class="chart">
-        <h3>Page Loads</h3>
+        <h3>Average Page Load Times</h3>
         <google-analytics-chart
           type="column"
-          metrics="ga:pageLoadTime"
+          metrics="ga:avgPageLoadTime"
           dimensions="ga:date">
         </google-analytics-chart>
       </div>
