@@ -1,0 +1,97 @@
+<link rel="import" href="google-analytics-base.html">
+
+<polymer-element
+  name="google-analytics-realtime"
+  extends="google-analytics-base"
+  attributes="
+    pollingInterval
+    autoStart
+    data
+    ids
+    metrics
+    dimensions
+    filters
+    max-results
+    sort">
+
+  <script>
+
+    Polymer('google-analytics-realtime', {
+
+      pollingInterval: 5,
+
+      autoStart: true,
+
+      start: function() {
+        clearTimeout(this.timeout);
+        this.getData();
+      },
+
+      stop: function() {
+        clearTimeout(this.timeout);
+      },
+
+      userAuthorized: function(data) {
+        this.super();
+        if (this.autoStart) {
+          this.start();
+        }
+      },
+
+      getData: function() {
+        if (this.authorized && this.hasRequiredParams) {
+
+          // Required paramters.
+          var query = {
+            'ids': this.ids,
+            'metrics': this.metrics
+          };
+
+          // Optional parameters.
+          if (this.dimensions) query.dimensions = this.dimensions;
+          if (this.filters) query.filters = this.filters;
+          if (this.maxResults) query['max-results'] = this.maxResults;
+          if (this.sort) query.sort = this.sort;
+
+          gapi.client.analytics.data.realtime
+            .get(query)
+            .execute(function(response) {
+              // Queue up the next reqeust based on the polling interval.
+              this.timeout = setTimeout(this.getData.bind(this),
+                  this.pollingInterval * 1000);
+
+              // Handle the resonse after queuing up the next request so
+              // responses can call `this.stop()` if needed.
+              this.handleResponse(response);
+
+            }.bind(this));
+
+          return true;
+        }
+      },
+
+      /**
+       * The callback for the query run in `getData`. This is a separate
+       * function so subclasses can alter how the response is handled.
+       *
+       * @method handleResponse
+       */
+      handleResponse: function(response) {
+        if (response.error) {
+          this.fire('analytics-realtime-error', response.error);
+        }
+        else {
+          this.data = response;
+          this.fire('analytics-realtime-success', response);
+        }
+      },
+
+      get hasRequiredParams() {
+        return !!(this.ids && this.metrics);
+      }
+
+    });
+
+  </script>
+
+</polymer-element>
