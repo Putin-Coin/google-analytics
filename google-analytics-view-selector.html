@@ -26,12 +26,22 @@ Element for selecting the view ID (ids) value for queries inside a
 
 <polymer-element
   name="google-analytics-view-selector"
-  extends="google-analytics-base">
+  extends="google-analytics-base"
+  attributes="ids">
 
   <template>
+    <style>
+      select {
+        color: inherit;
+        font: inherit;
+        margin: 0;
+      }
+    </style>
     <span class="control">
       <label for="account">Account</label>
-      <select id="account" on-change="{{changeAccount}}">
+      <select id="account"
+        on-change="{{changeAccount}}"
+        selectedIndex="{{accountIndex}}">
         <template repeat="{{account,i in accounts}}">
           <option value="{{i}}">{{account.name}}</option>
         </template>
@@ -39,7 +49,9 @@ Element for selecting the view ID (ids) value for queries inside a
     </span>
     <span class="control">
       <label>Property</label>
-      <select id="property" on-change="{{changeProperty}}">
+      <select id="property"
+        on-change="{{changeProperty}}"
+        selectedIndex="{{propertyIndex}}">
         <template repeat="{{property,i in properties}}">
           <option value="{{i}}">{{property.name}}</option>
         </template>
@@ -47,9 +59,11 @@ Element for selecting the view ID (ids) value for queries inside a
     </span>
     <span class="control">
       <label>View</label>
-      <select id="view" on-change="{{changeView}}">
+      <select id="view"
+        on-change="{{changeView}}"
+        selectedIndex="{{viewIndex}}">
         <template repeat="{{view,i in views}}">
-          <option value="{{view.ids}}">{{view.name}}</option>
+          <option value="{{i}}">{{view.name}}</option>
         </template>
       </select>
     </span>
@@ -95,20 +109,46 @@ Element for selecting the view ID (ids) value for queries inside a
          */
         views: [],
 
+        /**
+         * The `ids` attribute, when found is used to preselect the choosen
+         * account, property, and view.
+         *
+         * @attribute accounts
+         * @type Array
+         */
+        ids: null,
+
+        accountIndex: 0,
+
+        propertyIndex: 0,
+
+        viewIndex: 0,
+
         authorized: function(data) {
 
           accountSummaries.get().then(function(accounts) {
-
-            this.setAttribute('resolved', '');
-
             this.accounts = accounts;
-            this.properties = this.accounts[0].properties;
-            this.views = this.properties[0].views;
-
-            this.ids = this.views[0].ids;
-
+            if (this.ids) {
+              // If ids is set in the markup, trigger a change as if the
+              // user had choosen it.
+              this.idsChanged();
+            } else {
+              this.properties = this.accounts[0].properties;
+              this.propertyIndex = 0;
+              this.views = this.properties[0].views;
+              this.viewIndex = 0;
+              this.ids = this.views[0].ids;
+            }
           }.bind(this));
+        },
 
+        unauthorized: function() {
+          this.accountIndex = null;
+          this.propertyIndex = null;
+          this.viewIndex = null;
+          this.accounts = [];
+          this.properties = [];
+          this.views = [];
         },
 
         /**
@@ -119,11 +159,14 @@ Element for selecting the view ID (ids) value for queries inside a
          * @method changeAccount
          */
         changeAccount: function() {
-          var account = this.$.account.value;
-          this.properties = this.accounts[account].properties;
-          this.views = this.properties[0].views;
+          this.accountIndex = +this.$.account.value;
+          this.propertyIndex = 0;
+          this.viewIndex = 0;
 
-          this.ids = this.views[0].ids;
+          this.properties = this.accounts[this.accountIndex].properties;
+          this.views = this.properties[this.propertyIndex].views;
+
+          this.ids = this.views[this.viewIndex].ids;
         },
 
         /**
@@ -134,10 +177,12 @@ Element for selecting the view ID (ids) value for queries inside a
          * @method changeProperty
          */
         changeProperty: function() {
-          var property = this.$.property.value;
-          this.views = this.properties[property].views;
+          this.propertyIndex = +this.$.property.value;
+          this.viewIndex = 0;
 
-          this.ids = this.views[0].ids;
+          this.views = this.properties[this.propertyIndex].views;
+
+          this.ids = this.views[this.viewIndex].ids;
         },
 
         /**
@@ -147,13 +192,37 @@ Element for selecting the view ID (ids) value for queries inside a
          * @method changeView
          */
         changeView: function() {
-          this.ids = this.$.view.value;
+          this.viewIndex = +this.$.view.value;
+
+          this.ids = this.views[this.viewIndex].ids;
         },
 
         idsChanged: function() {
-          this.fire('analytics-dashboard-control-change', {ids: this.ids});
-        }
+          this.updateSelectedItems();
 
+          this.fire('analytics-dashboard-control-change', {ids: this.ids});
+        },
+
+        updateSelectedItems: function() {
+          if (!this.accounts) return;
+
+          for (var i = 0, account; account = this.accounts[i]; i++) {
+            for (var j = 0, property;
+                property = this.accounts[i].properties[j]; j++) {
+              for (var k = 0, view;
+                  view = this.accounts[i].properties[j].views[k]; k++) {
+                if (view.ids == this.ids) {
+                  this.accountIndex = i;
+                  this.propertyIndex = j;
+                  this.viewIndex = k;
+                  this.properties = this.accounts[i].properties;
+                  this.views = this.properties[j].views;
+                  return;
+                }
+              }
+            }
+          }
+        }
       });
 
 

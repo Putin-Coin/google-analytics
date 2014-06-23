@@ -43,19 +43,29 @@ update query parameters.
   <script>
 
     Polymer('google-analytics-dashboard', {
+
+      /**
+       * The `query` attribute represents the internal query object of this
+       * dashboard. It is updated when control elements fire the
+       * `analytics-dashboard-control-change` event and pass along query data.
+       *
+       * @attribute query
+       * @type object
+       */
+      query: {},
+
       created: function() {
         this.super();
+        this.unauthorized(); // Assume unauthorized state at first.
+
         this.addEventListener('analytics-dashboard-control-change', function(event) {
 
-          // When components inside a google-analytics-dashboard element fire the
-          // analytics-dashboard-control-change event, they will pass along the
-          // query paramters that have changed.
-          var charts = this.querySelectorAll('google-analytics-chart');
-          for (var i = 0, chart; chart = charts[i]; i++) {
-            Object.keys(event.detail).forEach(function(key) {
-              chart[key] = event.detail[key];
-            })
-          }
+          // Update `this.query` with the passed event data.
+          Object.keys(event.detail).forEach(function(key) {
+            this.query[key] = event.detail[key];
+          }.bind(this))
+
+          if (this.isAuthorized) this.updateChildren();
 
           // This event is only relevant to google-analytics-dashboard elements
           // and their children, so no need to bubble up to the document
@@ -65,7 +75,29 @@ update query parameters.
       },
 
       authorized: function() {
+        this.removeAttribute('unauthorized');
         this.setAttribute('authorized', '');
+        this.updateChildren();
+      },
+
+      unauthorized: function() {
+        this.removeAttribute('authorized');
+        this.setAttribute('unauthorized', '');
+      },
+
+      /**
+       * The `updateChildren` method updates each of this dashboards
+       * `<google-analytics-chart>` element with it's current query value.
+       *
+       * @method getData
+       */
+      updateChildren: function() {
+        var charts = this.querySelectorAll('google-analytics-chart');
+        for (var i = 0, chart; chart = charts[i]; i++) {
+          Object.keys(this.query).forEach(function(key) {
+            chart[key] = this.query[key];
+          }.bind(this));
+        }
       }
 
     });

@@ -223,12 +223,17 @@ Element for querying the Google Analytics Core Reporting API.
           this.getData();
         },
 
+        unauthorized: function() {
+          this.data = null;
+        },
+
         /**
          * Query the Google Analytics Core Reporting API.
          *
          * @method getData
          */
         getData: function() {
+
           if (this.isAuthorized && this.isValid) {
 
             // Required paramters.
@@ -252,6 +257,8 @@ Element for querying the Google Analytics Core Reporting API.
 
             gapi.client.analytics.data.ga.get(query)
                 .execute(this.handleResponse.bind(this));
+
+            return true;
           }
         },
 

@@ -1,6 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../google-apis/google-client-api.html">
-<link rel="import" href="../native-promise-only/lib/npo.src.js">
+<script src="../native-promise-only/lib/npo.src.js"></script>
 
 <!--
 The base element for other google analytics elements. This element is not
@@ -29,27 +29,31 @@ intended to be used by itself. It is only intended to be subclassed.
 
       /**
        * A promise that is resolved when the underlying client libraries are
-       * loaded.
+       * loaded. It is rejected if there are any load errors.
        */
       var loadPromise = new Promise(function(resolve, reject) {
-        document.addEventListener('google-api-load', function(event) {
+        document.addEventListener('google-api-load', function fn(event) {
           var lib = event.detail;
           if (lib.name == 'analytics' && lib.version == 'v3') {
             isLoaded = true;
             resolve(event.detail);
+            document.removeEventListener('google-api-load', fn);
+          }
+        });
+        document.addEventListener('google-api-load-error', function fn(event) {
+          var lib = event.detail;
+          if (lib.name == 'analytics' && lib.version == 'v3') {
+            reject(event.detail);
+            document.removeEventListener('google-api-load-error', fn);
           }
         });
       });
 
-      /**
-       * A promise that is resolved once the user has successfully signed in.
-       */
-      var authorizedPromise = new Promise(function(resolve, reject) {
-        document.addEventListener('google-signin-success', function(event) {
-          isAuthorized = true;
-          resolve(event.detail.result);
-        });
-      });
+      // Log any errors loading the client library.
+      loadPromise.catch(function(err) {
+        console.error(err.stack || err);
+      })
+
 
       Polymer('google-analytics-base', {
 
@@ -75,12 +79,14 @@ intended to be used by itself. It is only intended to be subclassed.
         },
 
         created: function() {
-          Promise
-              .all([loadPromise, authorizedPromise])
-              .then(function(value) {
-                var authorizedPromiseValue = value[1];
-                this.authorized(authorizedPromiseValue);
-              }.bind(this));
+          document.addEventListener('google-signin-success', function(event) {
+            isAuthorized = true;
+            loadPromise.then(this.authorized.bind(this, event.detail.result));
+          }.bind(this));
+          document.addEventListener('google-signed-out', function(event) {
+            isAuthorized = false;
+            this.unauthorized();
+          }.bind(this));
         },
 
         /**
@@ -92,6 +98,16 @@ intended to be used by itself. It is only intended to be subclassed.
          * @param {Object} data - The auth data information.
          */
         authorized: function(data) {
+          // Override in a subclass.
+        },
+
+        /**
+         * The `unauthorized` method will be invoked when the user has
+         * successfully signed out.
+         *
+         * @method unauthorized
+         */
+        unauthorized: function() {
           // Override in a subclass.
         }
 

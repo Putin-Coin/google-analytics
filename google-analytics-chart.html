@@ -29,12 +29,14 @@ Google Chart.
   attributes="type width height options">
 
   <template>
+    <content select="header,h1,h2,h3,h4,h5,h6"></content>
     <google-chart id="chart"
       type="{{type}}"
       width="{{width}}"
       height="{{height}}"
       data="{{data.dataTable}}">
     </google-chart>
+    <content select="footer"></content>
   </template>
 
   <script>
@@ -96,6 +98,7 @@ Google Chart.
         data: null,
 
         ready: function() {
+          this.setAttribute('unrendered', '');
           merge(this.$.chart.options, getChartOptions(this.type), this.options);
         },
 
@@ -104,11 +107,20 @@ Google Chart.
           metadata.get();
         },
 
+        getData: function() {
+          if (this.super()) {
+            this.setAttribute('pending', '');
+          }
+        },
+
         handleResponse: function(response) {
           if (response.error) {
             this.fire('analytics-query-error', response.error);
           }
           else {
+            this.removeAttribute('unrendered');
+            this.removeAttribute('pending');
+
             metadata.get().then(function(map) {
               switchApiNamesToDisplayNames(response.dataTable, map);
               ensureProperDataTableTypes(response.dataTable);
