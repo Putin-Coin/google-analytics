@@ -22,6 +22,6 @@
     "google-signin": "GoogleWebComponents/google-signin#master",
     "google-chart": "philipwalton/google-chart#native-data-table",
     "native-promise-only": "~0.4.1-g",
-    "polymer": "Polymer/polymer#master"
+    "polymer": "Polymer/polymer#~0.3.3"
   }
 }

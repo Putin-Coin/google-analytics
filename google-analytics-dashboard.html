@@ -34,12 +34,12 @@ update query parameters.
 
 <polymer-element
   name="google-analytics-dashboard"
-  extends="google-analytics-base">
+  extends="google-analytics-base"
+  on-analytics-dashboard-control-change="{{queryUpdated}}">
 
   <template>
     <content></content>
   </template>
-
   <script>
 
     Polymer('google-analytics-dashboard', {
@@ -54,24 +54,8 @@ update query parameters.
        */
       query: {},
 
-      created: function() {
-        this.super();
+      ready: function() {
         this.unauthorized(); // Assume unauthorized state at first.
-
-        this.addEventListener('analytics-dashboard-control-change', function(event) {
-
-          // Update `this.query` with the passed event data.
-          Object.keys(event.detail).forEach(function(key) {
-            this.query[key] = event.detail[key];
-          }.bind(this))
-
-          if (this.isAuthorized) this.updateChildren();
-
-          // This event is only relevant to google-analytics-dashboard elements
-          // and their children, so no need to bubble up to the document
-          event.stopPropagation();
-
-        }.bind(this));
       },
 
       authorized: function() {
@@ -83,6 +67,19 @@ update query parameters.
       unauthorized: function() {
         this.removeAttribute('authorized');
         this.setAttribute('unauthorized', '');
+      },
+
+      queryUpdated: function(event) {
+        // Update `this.query` with the passed event data.
+        Object.keys(event.detail).forEach(function(key) {
+          this.query[key] = event.detail[key];
+        }.bind(this))
+
+        if (this.isAuthorized) this.updateChildren();
+
+        // This event is only relevant to google-analytics-dashboard elements
+        // and their children, so no need to bubble up to the document
+        event.stopPropagation();
       },
 
       /**
