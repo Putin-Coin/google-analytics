@@ -43,7 +43,7 @@ intended to be used by itself. It is only intended to be subclassed.
         document.addEventListener('google-api-load-error', function fn(event) {
           var lib = event.detail;
           if (lib.name == 'analytics' && lib.version == 'v3') {
-            reject(event.detail);
+            reject(event.detail.error);
             document.removeEventListener('google-api-load-error', fn);
           }
         });
@@ -58,10 +58,10 @@ intended to be used by itself. It is only intended to be subclassed.
       Polymer('google-analytics-base', {
 
         /**
-         * The `loaded` attribute is true when the underlying analytics library
-         * is fully loaded.
+         * The `isLoaded` attribute is true when the underlying analytics
+         * library is fully loaded.
          *
-         * @attribute loaded
+         * @attribute isLoaded
          * @type boolean
          */
         get isLoaded() {
@@ -69,9 +69,11 @@ intended to be used by itself. It is only intended to be subclassed.
         },
 
         /**
-         * The `authorized` attribute is true once the user successfully signs in.
+         * The `isAuthorized` attribute is true once the user successfully
+         * signs in <em>and</em> the libraries have been loaded. If the user
+         * signs out this will be false.
          *
-         * @attribute authorized
+         * @attribute isAuthorized
          * @type boolean
          */
         get isAuthorized() {

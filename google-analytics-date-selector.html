@@ -23,8 +23,7 @@ Element for selecting the start and end date values for queries inside a
 
 @element google-analytics-date-selector
 @extends google-analytics-base
-@blurb Element for selecting the start and end date values for Google Analytics
-queries
+@blurb Element for selecting the start and end date values for Google Analytics queries
 @status alpha
 @homepage http://polymerlabs.github.io/google-analytics
 -->
@@ -83,10 +82,13 @@ queries
          * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
          * positive integer).
          *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#startDate">Core Reporting API parameter reference</a> for more details.
+         *
          * @attribute startDate
+         * @default '7daysAgo'
          * @type string
          */
-        startDate: '7daysAgo',
+        startDate: convertDate('7daysAgo'),
 
         /**
          * The `endDate` attribute is the end date for fetching Analytics
@@ -94,16 +96,20 @@ queries
          * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
          * positive integer).
          *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#endDate">Core Reporting API parameter reference</a> for more details.
+         *
          * @attribute endDate
+         * @default 'yesterday'
          * @type string
          */
-        endDate: 'yesterday',
+        endDate: convertDate('yesterday'),
 
         /**
          * The `minStartDate` attribute is used as the `min` attribute on the
          * start date `<input>`.
          *
          * @attribute minStartDate
+         * @default '2005-01-01'
          * @type string
          */
         minStartDate: '2005-01-01',
@@ -113,23 +119,25 @@ queries
          * end date `<input>`.
          *
          * @attribute maxEndDate
+         * @default 'today'
          * @type string
          */
         maxEndDate: convertDate('today'),
 
-        ready: function() {
-          this.startDate = convertDate(this.startDate);
-          this.endDate = convertDate(this.endDate);
+        startDateChanged: function(old, cur) {
+          this.startDate = convertDate(cur);
+          this.$.startDate.value = this.startDate;
+          this.fire('analytics-dashboard-control-change', {
+            startDate: this.startDate
+          });
         },
 
-        startDateChanged: function() {
-          this.$.startDate.value = convertDate(this.startDate);
-          this.fire('analytics-dashboard-control-change', { startDate: this.startDate });
-        },
-
-        endDateChanged: function() {
-          this.$.endDate.value = convertDate(this.endDate);
-          this.fire('analytics-dashboard-control-change', { endDate: this.endDate });
+        endDateChanged: function(old, cur) {
+          this.endDate = convertDate(cur);
+          this.$.endDate.value = this.endDate;
+          this.fire('analytics-dashboard-control-change', {
+            endDate: this.endDate
+          });
         }
       });
 

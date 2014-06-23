@@ -113,8 +113,10 @@ Element for selecting the view ID (ids) value for queries inside a
          * The `ids` attribute, when found is used to preselect the choosen
          * account, property, and view.
          *
-         * @attribute accounts
-         * @type Array
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#ids">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute ids
+         * @type string
          */
         ids: null,
 
@@ -203,6 +205,12 @@ Element for selecting the view ID (ids) value for queries inside a
           this.fire('analytics-dashboard-control-change', {ids: this.ids});
         },
 
+        /**
+         * The `updateSelectedItems` is used to update the selected items in
+         * the individual selects when the `ids` changes.
+         *
+         * @method updateSelectedItems
+         */
         updateSelectedItems: function() {
           if (!this.accounts) return;
 
@@ -267,8 +275,8 @@ Element for selecting the view ID (ids) value for queries inside a
         /**
          * Loop through the full account summaries array and create a new array
          * the only contains the account, property, and view names and their
-         * children. Also exclude accounts with no properties as well as properties
-         * with no views.
+         * children. Also exclude accounts with no properties as well as
+         * properties with no views.
          * @param {Array} oldSummaries The account summaries array in the form
          *   return by the Management API.
          * @return {Array} The trimmed-down account summaries.
@@ -300,9 +308,9 @@ Element for selecting the view ID (ids) value for queries inside a
 
         return {
           /**
-           * Return the `requestAccountSummaries` promise. If the promise exists,
-           * return it to avoid multiple requests. If the promise does not exist,
-           * initiate the request and cache the promise.
+           * Return the `requestAccountSummaries` promise. If the promise
+           * exists, return it to avoid multiple requests. If the promise does
+           * not exist, initiate the request and cache the promise.
            */
           get: function() {
             return promise || (promise =
