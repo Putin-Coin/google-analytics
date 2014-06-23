@@ -69,6 +69,14 @@ update query parameters.
         this.setAttribute('unauthorized', '');
       },
 
+      /**
+       * The `queryUpdated` method is the callback for whenever the
+       * `analytics-dashboard-control-change` is fired. It updates the
+       * query attribute, which is then sent to child charts.
+       *
+       * @method queryUpdated
+       * @param {CustomEvent} event - The event with the query data.
+       */
       queryUpdated: function(event) {
         // Update `this.query` with the passed event data.
         Object.keys(event.detail).forEach(function(key) {
@@ -76,17 +84,13 @@ update query parameters.
         }.bind(this))
 
         if (this.isAuthorized) this.updateChildren();
-
-        // This event is only relevant to google-analytics-dashboard elements
-        // and their children, so no need to bubble up to the document
-        event.stopPropagation();
       },
 
       /**
        * The `updateChildren` method updates each of this dashboards
        * `<google-analytics-chart>` element with it's current query value.
        *
-       * @method getData
+       * @method updateChildren
        */
       updateChildren: function() {
         var charts = this.querySelectorAll('google-analytics-chart');
